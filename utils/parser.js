@@ -36,79 +36,96 @@ export function parseStudentName(columns) {
     }
 }
 
-// ฟังก์ชันประมวลผลไฟล์ Excel (รับ File object)
-export async function processFiles(files, exportType) {
+// ฟังก์ชันประมวลผลไฟล์ Excel (รับ File object, ประเภทการส่งออก, โดเมนอีเมล, ขนาด Batch, และ callback สำหรับรายงานความคืบหน้า)
+export async function processFiles(files, exportType, customDomain = 'minburi.ac.th', batchSize = 100, onFileProgress = null) {
     let studentsPVC = [];
     let studentsPVS = [];
+    const parsedBatchSize = parseInt(batchSize, 10) || 100;
 
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (!file.name.endsWith('.xlsx') || file.name.includes('~$')) continue;
 
-        const data = await file.arrayBuffer();
-        const workbook = xlsx.read(data, { type: 'array' });
+        if (onFileProgress) {
+            onFileProgress(file.name, 'processing', 0);
+        }
 
-        workbook.SheetNames.forEach(sheetName => {
-            const sheet = workbook.Sheets[sheetName];
-            const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
-            
-            for (let j = 8; j < rows.length; j++) {
-                const columns = rows[j];
-                if (!columns || columns.length === 0) continue;
+        try {
+            const data = await file.arrayBuffer();
+            const workbook = xlsx.read(data, { type: 'array' });
+            let fileStudentCount = 0;
 
-                const studentId = columns[2] ? String(columns[2]).trim() : '';
+            workbook.SheetNames.forEach(sheetName => {
+                const sheet = workbook.Sheets[sheetName];
+                const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
                 
-                if (studentId === 'รหัสประจำตัว' || !studentId || isNaN(studentId)) continue;
+                for (let j = 8; j < rows.length; j++) {
+                    const columns = rows[j];
+                    if (!columns || columns.length === 0) continue;
 
-                const { firstName, lastName } = parseStudentName(columns);
-                const email = `${studentId}@minburi.ac.th`;
+                    const studentId = columns[2] ? String(columns[2]).trim() : '';
+                    
+                    if (studentId === 'รหัสประจำตัว' || !studentId || isNaN(studentId)) continue;
 
-                let level = 'ปวช'; 
-                if (studentId.charAt(2) === '3' || sheetName.includes('ปวส') || file.name.includes('ปวส')) {
-                    level = 'ปวส';
-                } else if (studentId.charAt(2) === '2' || sheetName.includes('ปวช') || file.name.includes('ปวช')) {
-                    level = 'ปวช';
+                    const { firstName, lastName } = parseStudentName(columns);
+                    const email = `${studentId}@${customDomain}`;
+
+                    let level = 'ปวช'; 
+                    if (studentId.charAt(2) === '3' || sheetName.includes('ปวส') || file.name.includes('ปวส')) {
+                        level = 'ปวส';
+                    } else if (studentId.charAt(2) === '2' || sheetName.includes('ปวช') || file.name.includes('ปวช')) {
+                        level = 'ปวช';
+                    }
+
+                    let yearCode = studentId.substring(0, 2);
+                    let yearBE = isNaN(yearCode) ? '2569' : '25' + yearCode;
+
+                    const orgUnitPath = `/Students/${level}/${yearBE}`;
+
+                    const studentData = {
+                        firstName,
+                        lastName,
+                        email,
+                        password: studentId,
+                        orgUnitPath
+                    };
+                    
+                    if (level === 'ปวส') {
+                        studentsPVS.push(studentData);
+                    } else {
+                        studentsPVC.push(studentData);
+                    }
+                    fileStudentCount++;
                 }
+            });
 
-                let yearCode = studentId.substring(0, 2);
-                let yearBE = isNaN(yearCode) ? '2569' : '25' + yearCode;
-
-                const orgUnitPath = `/Students/${level}/${yearBE}`;
-
-                const studentData = {
-                    firstName,
-                    lastName,
-                    email,
-                    password: studentId,
-                    orgUnitPath
-                };
-                
-                if (level === 'ปวส') {
-                    studentsPVS.push(studentData);
-                } else {
-                    studentsPVC.push(studentData);
-                }
+            if (onFileProgress) {
+                onFileProgress(file.name, 'success', fileStudentCount);
             }
-        });
+        } catch (err) {
+            if (onFileProgress) {
+                onFileProgress(file.name, 'error', 0, err.message || 'เกิดข้อผิดพลาดในการประมวลผล');
+            }
+            throw err;
+        }
     }
 
     const zip = new JSZip();
 
     if (exportType === 'csv') {
-        const batchSize = 100;
         const BOM = '\uFEFF';
         const header = "First Name [Required],Last Name [Required],Email Address [Required],Password [Required],Org Unit Path [Required]\n";
 
         const createBatchCSVs = (students, levelName) => {
-            for (let i = 0; i < students.length; i += batchSize) {
-                const batch = students.slice(i, i + batchSize);
+            for (let i = 0; i < students.length; i += parsedBatchSize) {
+                const batch = students.slice(i, i + parsedBatchSize);
                 let csvContent = header;
 
                 batch.forEach(s => {
                     csvContent += `"${s.firstName}","${s.lastName}","${s.email}","${s.password}","${s.orgUnitPath}"\n`;
                 });
 
-                const batchNumber = Math.floor(i / batchSize) + 1;
+                const batchNumber = Math.floor(i / parsedBatchSize) + 1;
                 zip.file(`Google_Workspace_${levelName}_Batch_${batchNumber}.csv`, BOM + csvContent);
             }
         };
@@ -144,5 +161,18 @@ export async function processFiles(files, exportType) {
         throw new Error("ไม่พบข้อมูลนักเรียนที่ถูกต้องในไฟล์ที่อัปโหลด");
     }
 
-    return await zip.generateAsync({ type: 'blob' });
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+    return {
+        zipBlob,
+        summary: {
+            total: studentsPVC.length + studentsPVS.length,
+            pvcCount: studentsPVC.length,
+            pvsCount: studentsPVS.length
+        },
+        preview: {
+            pvc: studentsPVC.slice(0, 10),
+            pvs: studentsPVS.slice(0, 10)
+        }
+    };
 }
