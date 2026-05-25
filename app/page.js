@@ -10,6 +10,8 @@ export default function Home() {
   const [exportType, setExportType] = useState('csv');
   const [customDomain, setCustomDomain] = useState('minburi.ac.th');
   const [batchSize, setBatchSize] = useState(100);
+  const [orgUnitPVC, setOrgUnitPVC] = useState('');
+  const [orgUnitPVS, setOrgUnitPVS] = useState('');
   const [parsedData, setParsedData] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -92,6 +94,16 @@ export default function Home() {
       return;
     }
 
+    if (!orgUnitPVC.trim()) {
+      setError('กรุณากรอก Org Unit Path สำหรับ ปวช.');
+      return;
+    }
+
+    if (!orgUnitPVS.trim()) {
+      setError('กรุณากรอก Org Unit Path สำหรับ ปวส.');
+      return;
+    }
+
     setIsProcessing(true);
     setError(null);
     setSuccessMsg(null);
@@ -115,7 +127,15 @@ export default function Home() {
         }));
       };
 
-      const result = await processFiles(rawFiles, exportType, customDomain, batchSize, onProgress);
+      const result = await processFiles(
+        rawFiles,
+        exportType,
+        customDomain,
+        batchSize,
+        orgUnitPVC.trim(),
+        orgUnitPVS.trim(),
+        onProgress
+      );
       
       setParsedData({
         summary: result.summary,
@@ -177,6 +197,28 @@ export default function Home() {
                 min="1"
                 disabled={exportType === 'excel' || isProcessing}
                 className={exportType === 'excel' ? styles.disabledInput : ''}
+              />
+            </div>
+            <div className={styles.inputGroup}>
+              <label htmlFor="orgUnitPVC">Org Unit Path สำหรับ ปวช.</label>
+              <input
+                id="orgUnitPVC"
+                type="text"
+                value={orgUnitPVC}
+                onChange={(e) => setOrgUnitPVC(e.target.value)}
+                placeholder="เช่น /Students/ปวช/2568"
+                disabled={isProcessing}
+              />
+            </div>
+            <div className={styles.inputGroup}>
+              <label htmlFor="orgUnitPVS">Org Unit Path สำหรับ ปวส.</label>
+              <input
+                id="orgUnitPVS"
+                type="text"
+                value={orgUnitPVS}
+                onChange={(e) => setOrgUnitPVS(e.target.value)}
+                placeholder="เช่น /Students/ปวส/2568"
+                disabled={isProcessing}
               />
             </div>
           </div>

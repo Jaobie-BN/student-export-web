@@ -36,8 +36,15 @@ export function parseStudentName(columns) {
     }
 }
 
-// ฟังก์ชันประมวลผลไฟล์ Excel (รับ File object, ประเภทการส่งออก, โดเมนอีเมล, ขนาด Batch, และ callback สำหรับรายงานความคืบหน้า)
-export async function processFiles(files, exportType, customDomain = 'minburi.ac.th', batchSize = 100, onFileProgress = null) {
+// ฟังก์ชันประมวลผลไฟล์ Excel (รับ File object, ประเภทการส่งออก, โดเมนอีเมล, ขนาด Batch, ปวช Org Unit, ปวส Org Unit, และ callback สำหรับรายงานความคืบหน้า)
+export async function processFiles(files, exportType, customDomain = 'minburi.ac.th', batchSize = 100, orgUnitPVC = '', orgUnitPVS = '', onFileProgress = null) {
+    if (!orgUnitPVC || !orgUnitPVC.trim()) {
+        throw new Error('กรุณาระบุ Org Unit Path สำหรับ ปวช.');
+    }
+    if (!orgUnitPVS || !orgUnitPVS.trim()) {
+        throw new Error('กรุณาระบุ Org Unit Path สำหรับ ปวส.');
+    }
+
     let studentsPVC = [];
     let studentsPVS = [];
     const parsedBatchSize = parseInt(batchSize, 10) || 100;
@@ -78,9 +85,10 @@ export async function processFiles(files, exportType, customDomain = 'minburi.ac
                     }
 
                     let yearCode = studentId.substring(0, 2);
-                    let yearBE = isNaN(yearCode) ? '2569' : '25' + yearCode;
+                    const currentBE = new Date().getFullYear() + 543;
+                    let yearBE = isNaN(yearCode) ? String(currentBE) : '25' + yearCode;
 
-                    const orgUnitPath = `/Students/${level}/${yearBE}`;
+                    const orgUnitPath = level === 'ปวส' ? orgUnitPVS.trim() : orgUnitPVC.trim();
 
                     const studentData = {
                         firstName,
