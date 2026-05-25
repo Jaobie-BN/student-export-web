@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { saveAs } from 'file-saver';
 import { processFiles } from '../utils/parser';
 import styles from './page.module.css';
@@ -12,12 +12,36 @@ export default function Home() {
   const [batchSize, setBatchSize] = useState(100);
   const [orgUnitPVC, setOrgUnitPVC] = useState('');
   const [orgUnitPVS, setOrgUnitPVS] = useState('');
+  const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
   const [parsedData, setParsedData] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Load settings on mount
+  useEffect(() => {
+    const savedDomain = localStorage.getItem('student_export_domain');
+    const savedBatchSize = localStorage.getItem('student_export_batchSize');
+    const savedPVC = localStorage.getItem('student_export_orgUnitPVC');
+    const savedPVS = localStorage.getItem('student_export_orgUnitPVS');
+
+    if (savedDomain !== null) setCustomDomain(savedDomain);
+    if (savedBatchSize !== null) setBatchSize(parseInt(savedBatchSize) || 100);
+    if (savedPVC !== null) setOrgUnitPVC(savedPVC);
+    if (savedPVS !== null) setOrgUnitPVS(savedPVS);
+    setIsSettingsLoaded(true);
+  }, []);
+
+  // Save settings on changes
+  useEffect(() => {
+    if (!isSettingsLoaded) return;
+    localStorage.setItem('student_export_domain', customDomain);
+    localStorage.setItem('student_export_batchSize', String(batchSize));
+    localStorage.setItem('student_export_orgUnitPVC', orgUnitPVC);
+    localStorage.setItem('student_export_orgUnitPVS', orgUnitPVS);
+  }, [customDomain, batchSize, orgUnitPVC, orgUnitPVS, isSettingsLoaded]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -380,15 +404,28 @@ export default function Home() {
                         </tr>
                       </thead>
                       <tbody>
-                        {parsedData.preview.pvc.map((student, idx) => (
-                          <tr key={idx}>
-                            <td>{idx + 1}</td>
-                            <td>{student.firstName}</td>
-                            <td>{student.lastName}</td>
-                            <td className={styles.emailCell}>{student.email}</td>
-                            <td><code>{student.orgUnitPath}</code></td>
-                          </tr>
-                        ))}
+                        {parsedData.preview.pvc.map((student, idx) => {
+                          const dynamicEmail = `${student.password}@${customDomain}`;
+                          return (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td>{student.firstName}</td>
+                              <td>{student.lastName}</td>
+                              <td 
+                                key={`email-${dynamicEmail}`} 
+                                className={`${styles.emailCell} ${styles.highlightPulse}`}
+                              >
+                                {dynamicEmail}
+                              </td>
+                              <td 
+                                key={`org-${orgUnitPVC}`} 
+                                className={styles.highlightPulse}
+                              >
+                                <code>{orgUnitPVC}</code>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -415,15 +452,28 @@ export default function Home() {
                         </tr>
                       </thead>
                       <tbody>
-                        {parsedData.preview.pvs.map((student, idx) => (
-                          <tr key={idx}>
-                            <td>{idx + 1}</td>
-                            <td>{student.firstName}</td>
-                            <td>{student.lastName}</td>
-                            <td className={styles.emailCell}>{student.email}</td>
-                            <td><code>{student.orgUnitPath}</code></td>
-                          </tr>
-                        ))}
+                        {parsedData.preview.pvs.map((student, idx) => {
+                          const dynamicEmail = `${student.password}@${customDomain}`;
+                          return (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td>{student.firstName}</td>
+                              <td>{student.lastName}</td>
+                              <td 
+                                key={`email-${dynamicEmail}`} 
+                                className={`${styles.emailCell} ${styles.highlightPulse}`}
+                              >
+                                {dynamicEmail}
+                              </td>
+                              <td 
+                                key={`org-${orgUnitPVS}`} 
+                                className={styles.highlightPulse}
+                              >
+                                <code>{orgUnitPVS}</code>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

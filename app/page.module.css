@@ -43,7 +43,7 @@
   text-align: center;
   transition: all 0.3s ease;
   cursor: pointer;
-  background: rgba(15, 23, 42, 0.3);
+  background: var(--card-bg);
   margin-bottom: 2rem;
 }
 
@@ -68,7 +68,7 @@
 }
 
 .fileList {
-  background: rgba(15, 23, 42, 0.4);
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -91,7 +91,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--card-item-bg);
   padding: 0.75rem 1rem;
   border-radius: 8px;
   border: 1px solid var(--glass-border);
@@ -100,7 +100,7 @@
 
 .fileList li:hover {
   transform: translateX(5px);
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--card-item-hover-bg);
 }
 
 .fileInfo {
@@ -159,11 +159,11 @@
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: rgba(15, 23, 42, 0.3);
+  background: var(--card-bg);
 }
 
 .radioLabel:hover {
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: var(--radio-label-hover-border);
 }
 
 .radioLabel.active {
@@ -230,9 +230,9 @@
 }
 
 .errorMessage {
-  background: rgba(239, 68, 68, 0.1);
+  background: var(--alert-error-bg);
   border-left: 4px solid var(--error);
-  color: #fca5a5;
+  color: var(--text-error);
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
@@ -240,9 +240,9 @@
 }
 
 .successMessage {
-  background: rgba(16, 185, 129, 0.1);
+  background: var(--alert-success-bg);
   border-left: 4px solid var(--success);
-  color: #6ee7b7;
+  color: var(--text-success);
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
@@ -280,7 +280,7 @@
 
 /* Settings Panel */
 .settingsCard {
-  background: rgba(15, 23, 42, 0.4);
+  background: var(--card-bg);
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -325,7 +325,7 @@
   padding: 0.75rem 1rem;
   border-radius: 8px;
   border: 1px solid var(--glass-border);
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--input-bg);
   color: var(--text-main);
   font-size: 0.95rem;
   transition: all 0.3s ease;
@@ -335,7 +335,7 @@
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-  background: rgba(15, 23, 42, 0.7);
+  background: var(--input-focus-bg);
 }
 
 .disabledLabel {
@@ -345,8 +345,8 @@
 .disabledInput {
   opacity: 0.4;
   cursor: not-allowed;
-  background: rgba(15, 23, 42, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.05) !important;
+  background: var(--disabled-input-bg) !important;
+  border-color: var(--disabled-input-border) !important;
 }
 
 /* Status Badges */
@@ -363,26 +363,26 @@
 
 .badgePending {
   background: rgba(148, 163, 184, 0.15);
-  color: #cbd5e1;
+  color: var(--text-pending);
   border: 1px solid rgba(148, 163, 184, 0.3);
 }
 
 .badgeProcessing {
   background: rgba(59, 130, 246, 0.15);
-  color: #93c5fd;
+  color: var(--text-processing);
   border: 1px solid rgba(59, 130, 246, 0.3);
   animation: pulse 1.5s infinite alternate;
 }
 
 .badgeSuccess {
   background: rgba(16, 185, 129, 0.15);
-  color: #6ee7b7;
+  color: var(--text-success);
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .badgeError {
   background: rgba(239, 68, 68, 0.15);
-  color: #fca5a5;
+  color: var(--text-error);
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
@@ -428,7 +428,7 @@
 }
 
 .statCard {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--stat-card-bg);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   padding: 1.25rem;
@@ -441,7 +441,7 @@
 
 .statCard:hover {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--stat-card-hover-bg);
 }
 
 .statValue {
@@ -466,7 +466,7 @@
 }
 
 .previewGroup {
-  background: rgba(15, 23, 42, 0.3);
+  background: var(--card-bg);
   border: 1px solid var(--glass-border);
   border-radius: 16px;
   padding: 1.5rem;
@@ -482,7 +482,7 @@
 .tableWrapper {
   overflow-x: auto;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--table-wrapper-border);
 }
 
 .previewTable {
@@ -493,17 +493,17 @@
 }
 
 .previewTable th {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--table-th-bg);
   color: var(--text-main);
   font-weight: 600;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--table-border);
 }
 
 .previewTable td {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  color: rgba(248, 250, 252, 0.8);
+  border-bottom: 1px solid var(--table-td-border);
+  color: var(--text-main);
 }
 
 .previewTable tr:last-child td {
@@ -511,19 +511,32 @@
 }
 
 .previewTable tr:nth-child(even) {
-  background: rgba(255, 255, 255, 0.01);
+  background: var(--table-tr-even);
 }
 
 .previewTable code {
   font-family: monospace;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--code-bg);
   padding: 0.15rem 0.35rem;
   border-radius: 4px;
-  color: #cbd5e1;
+  color: var(--code-color);
 }
 
 .emailCell {
-  color: #60a5fa !important;
+  color: var(--email-color) !important;
+  
+  @keyframes highlightPulse {
+    0% {
+      background: rgba(59, 130, 246, 0.25);
+    }
+    100% {
+      background: transparent;
+    }
+  }
+
+  .highlightPulse {
+    animation: highlightPulse 0.8s ease-out;
+  }
 }
 
 .remainingText {

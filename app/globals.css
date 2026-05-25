@@ -10,6 +10,73 @@
   --success: #10b981;
   --error: #ef4444;
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Theme-aware backgrounds */
+  --card-bg: rgba(15, 23, 42, 0.4);
+  --card-item-bg: rgba(255, 255, 255, 0.05);
+  --card-item-hover-bg: rgba(255, 255, 255, 0.1);
+  --radio-label-hover-border: rgba(255, 255, 255, 0.3);
+  --input-bg: rgba(15, 23, 42, 0.5);
+  --input-focus-bg: rgba(15, 23, 42, 0.7);
+  --disabled-input-bg: rgba(15, 23, 42, 0.2);
+  --disabled-input-border: rgba(255, 255, 255, 0.05);
+  --stat-card-bg: rgba(255, 255, 255, 0.03);
+  --stat-card-hover-bg: rgba(255, 255, 255, 0.05);
+  --table-th-bg: rgba(255, 255, 255, 0.04);
+  --table-tr-even: rgba(255, 255, 255, 0.01);
+  --table-td-border: rgba(255, 255, 255, 0.04);
+  --table-border: rgba(255, 255, 255, 0.05);
+  --table-wrapper-border: rgba(255, 255, 255, 0.05);
+
+  /* Theme-aware text colors & status colors */
+  --text-success: #6ee7b7;
+  --text-error: #fca5a5;
+  --text-pending: #cbd5e1;
+  --text-processing: #93c5fd;
+  --email-color: #60a5fa;
+  --code-color: #cbd5e1;
+  --code-bg: rgba(0, 0, 0, 0.2);
+  --alert-success-bg: rgba(16, 185, 129, 0.1);
+  --alert-error-bg: rgba(239, 68, 68, 0.1);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-gradient-start: #f1f5f9;
+    --bg-gradient-end: #cbd5e1;
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(15, 23, 42, 0.08);
+
+    /* Theme-aware backgrounds */
+    --card-bg: rgba(15, 23, 42, 0.03);
+    --card-item-bg: rgba(15, 23, 42, 0.02);
+    --card-item-hover-bg: rgba(15, 23, 42, 0.04);
+    --radio-label-hover-border: rgba(15, 23, 42, 0.15);
+    --input-bg: rgba(255, 255, 255, 0.8);
+    --input-focus-bg: rgba(255, 255, 255, 0.95);
+    --disabled-input-bg: rgba(15, 23, 42, 0.01);
+    --disabled-input-border: rgba(15, 23, 42, 0.04);
+    --stat-card-bg: rgba(15, 23, 42, 0.01);
+    --stat-card-hover-bg: rgba(15, 23, 42, 0.02);
+    --table-th-bg: rgba(15, 23, 42, 0.03);
+    --table-tr-even: rgba(15, 23, 42, 0.005);
+    --table-td-border: rgba(15, 23, 42, 0.02);
+    --table-border: rgba(15, 23, 42, 0.04);
+    --table-wrapper-border: rgba(15, 23, 42, 0.06);
+
+    /* Theme-aware text colors & status colors */
+    --text-success: #047857;      /* Dark Green */
+    --text-error: #b91c1c;        /* Dark Red */
+    --text-pending: #475569;      /* Slate-600 */
+    --text-processing: #1d4ed8;   /* Dark Blue */
+    --email-color: #2563eb;       /* Primary Blue */
+    --code-color: #1e293b;        /* Dark Slate */
+    --code-bg: rgba(15, 23, 42, 0.06);
+    --alert-success-bg: rgba(16, 185, 129, 0.08);
+    --alert-error-bg: rgba(239, 68, 68, 0.08);
+  }
 }
 
 * {
