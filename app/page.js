@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import { saveAs } from 'file-saver';
-import { processFiles } from '../utils/parser';
-import styles from './page.module.css';
+import { useState, useRef, useEffect } from "react";
+import { saveAs } from "file-saver";
+import { processFiles } from "../utils/parser";
+import styles from "./page.module.css";
 
 export default function Home() {
   const [files, setFiles] = useState([]);
-  const [exportType, setExportType] = useState('csv');
-  const [customDomain, setCustomDomain] = useState('minburi.ac.th');
+  const [exportType, setExportType] = useState("csv");
+  const [customDomain, setCustomDomain] = useState("minburi.ac.th");
   const [batchSize, setBatchSize] = useState(100);
-  const [orgUnitPVC, setOrgUnitPVC] = useState('');
-  const [orgUnitPVS, setOrgUnitPVS] = useState('');
+  const [orgUnitPVC, setOrgUnitPVC] = useState("");
+  const [orgUnitPVS, setOrgUnitPVS] = useState("");
   const [usePVC, setUsePVC] = useState(true);
   const [usePVS, setUsePVS] = useState(true);
   const [absentWeight, setAbsentWeight] = useState(1.0);
@@ -26,38 +26,52 @@ export default function Home() {
 
   // Load settings on mount
   useEffect(() => {
-    const savedDomain = localStorage.getItem('student_export_domain');
-    const savedBatchSize = localStorage.getItem('student_export_batchSize');
-    const savedPVC = localStorage.getItem('student_export_orgUnitPVC');
-    const savedPVS = localStorage.getItem('student_export_orgUnitPVS');
-    const savedUsePVC = localStorage.getItem('student_export_usePVC');
-    const savedUsePVS = localStorage.getItem('student_export_usePVS');
-    const savedAbsentWeight = localStorage.getItem('student_export_absentWeight');
-    const savedLateWeight = localStorage.getItem('student_export_lateWeight');
+    const savedDomain = localStorage.getItem("student_export_domain");
+    const savedBatchSize = localStorage.getItem("student_export_batchSize");
+    const savedPVC = localStorage.getItem("student_export_orgUnitPVC");
+    const savedPVS = localStorage.getItem("student_export_orgUnitPVS");
+    const savedUsePVC = localStorage.getItem("student_export_usePVC");
+    const savedUsePVS = localStorage.getItem("student_export_usePVS");
+    const savedAbsentWeight = localStorage.getItem(
+      "student_export_absentWeight",
+    );
+    const savedLateWeight = localStorage.getItem("student_export_lateWeight");
 
     if (savedDomain !== null) setCustomDomain(savedDomain);
     if (savedBatchSize !== null) setBatchSize(parseInt(savedBatchSize) || 100);
     if (savedPVC !== null) setOrgUnitPVC(savedPVC);
     if (savedPVS !== null) setOrgUnitPVS(savedPVS);
-    if (savedUsePVC !== null) setUsePVC(savedUsePVC === 'true');
-    if (savedUsePVS !== null) setUsePVS(savedUsePVS === 'true');
-    if (savedAbsentWeight !== null) setAbsentWeight(parseFloat(savedAbsentWeight) || 1.0);
-    if (savedLateWeight !== null) setLateWeight(parseFloat(savedLateWeight) || 0.5);
+    if (savedUsePVC !== null) setUsePVC(savedUsePVC === "true");
+    if (savedUsePVS !== null) setUsePVS(savedUsePVS === "true");
+    if (savedAbsentWeight !== null)
+      setAbsentWeight(parseFloat(savedAbsentWeight) || 1.0);
+    if (savedLateWeight !== null)
+      setLateWeight(parseFloat(savedLateWeight) || 0.5);
     setIsSettingsLoaded(true);
   }, []);
 
   // Save settings on changes
   useEffect(() => {
     if (!isSettingsLoaded) return;
-    localStorage.setItem('student_export_domain', customDomain);
-    localStorage.setItem('student_export_batchSize', String(batchSize));
-    localStorage.setItem('student_export_orgUnitPVC', orgUnitPVC);
-    localStorage.setItem('student_export_orgUnitPVS', orgUnitPVS);
-    localStorage.setItem('student_export_usePVC', String(usePVC));
-    localStorage.setItem('student_export_usePVS', String(usePVS));
-    localStorage.setItem('student_export_absentWeight', String(absentWeight));
-    localStorage.setItem('student_export_lateWeight', String(lateWeight));
-  }, [customDomain, batchSize, orgUnitPVC, orgUnitPVS, usePVC, usePVS, absentWeight, lateWeight, isSettingsLoaded]);
+    localStorage.setItem("student_export_domain", customDomain);
+    localStorage.setItem("student_export_batchSize", String(batchSize));
+    localStorage.setItem("student_export_orgUnitPVC", orgUnitPVC);
+    localStorage.setItem("student_export_orgUnitPVS", orgUnitPVS);
+    localStorage.setItem("student_export_usePVC", String(usePVC));
+    localStorage.setItem("student_export_usePVS", String(usePVS));
+    localStorage.setItem("student_export_absentWeight", String(absentWeight));
+    localStorage.setItem("student_export_lateWeight", String(lateWeight));
+  }, [
+    customDomain,
+    batchSize,
+    orgUnitPVC,
+    orgUnitPVS,
+    usePVC,
+    usePVS,
+    absentWeight,
+    lateWeight,
+    isSettingsLoaded,
+  ]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -75,23 +89,25 @@ export default function Home() {
     setError(null);
     setSuccessMsg(null);
     setParsedData(null);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const droppedFiles = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.xlsx'));
+      const droppedFiles = Array.from(e.dataTransfer.files).filter((f) =>
+        f.name.endsWith(".xlsx"),
+      );
       if (droppedFiles.length === 0) {
-        setError('กรุณาอัปโหลดไฟล์ Excel (.xlsx) เท่านั้น');
+        setError("กรุณาอัปโหลดไฟล์ Excel (.xlsx) เท่านั้น");
         return;
       }
-      setFiles(prev => {
+      setFiles((prev) => {
         const newFiles = [...prev];
-        droppedFiles.forEach(f => {
-          if (!newFiles.some(existing => existing.name === f.name)) {
+        droppedFiles.forEach((f) => {
+          if (!newFiles.some((existing) => existing.name === f.name)) {
             newFiles.push({
               file: f,
               name: f.name,
-              status: 'pending',
+              status: "pending",
               studentCount: null,
-              error: null
+              error: null,
             });
           }
         });
@@ -105,21 +121,23 @@ export default function Home() {
     setSuccessMsg(null);
     setParsedData(null);
     if (e.target.files && e.target.files.length > 0) {
-      const selectedFiles = Array.from(e.target.files).filter(f => f.name.endsWith('.xlsx'));
+      const selectedFiles = Array.from(e.target.files).filter((f) =>
+        f.name.endsWith(".xlsx"),
+      );
       if (selectedFiles.length === 0) {
-        setError('กรุณาอัปโหลดไฟล์ Excel (.xlsx) เท่านั้น');
+        setError("กรุณาอัปโหลดไฟล์ Excel (.xlsx) เท่านั้น");
         return;
       }
-      setFiles(prev => {
+      setFiles((prev) => {
         const newFiles = [...prev];
-        selectedFiles.forEach(f => {
-          if (!newFiles.some(existing => existing.name === f.name)) {
+        selectedFiles.forEach((f) => {
+          if (!newFiles.some((existing) => existing.name === f.name)) {
             newFiles.push({
               file: f,
               name: f.name,
-              status: 'pending',
+              status: "pending",
               studentCount: null,
-              error: null
+              error: null,
             });
           }
         });
@@ -130,22 +148,22 @@ export default function Home() {
 
   const handleProcess = async () => {
     if (files.length === 0) {
-      setError('กรุณาเลือกไฟล์ก่อนทำการประมวลผล');
+      setError("กรุณาเลือกไฟล์ก่อนทำการประมวลผล");
       return;
     }
 
     if (!usePVC && !usePVS) {
-      setError('กรุณาเลือกอย่างน้อยหนึ่งระดับชั้น (ปวช. หรือ ปวส.)');
+      setError("กรุณาเลือกอย่างน้อยหนึ่งระดับชั้น (ปวช. หรือ ปวส.)");
       return;
     }
 
     if (usePVC && !orgUnitPVC.trim()) {
-      setError('กรุณากรอก Org Unit Path สำหรับ ปวช.');
+      setError("กรุณากรอก Org Unit Path สำหรับ ปวช.");
       return;
     }
 
     if (usePVS && !orgUnitPVS.trim()) {
-      setError('กรุณากรอก Org Unit Path สำหรับ ปวส.');
+      setError("กรุณากรอก Org Unit Path สำหรับ ปวส.");
       return;
     }
 
@@ -155,21 +173,24 @@ export default function Home() {
     setParsedData(null);
 
     try {
-      const rawFiles = files.map(f => f.file);
+      const rawFiles = files.map((f) => f.file);
 
       // Callback to update file progress in real-time
       const onProgress = (fileName, status, studentCount, errMsg = null) => {
-        setFiles(prev => prev.map(f => {
-          if (f.name === fileName) {
-            return {
-              ...f,
-              status,
-              studentCount: status === 'success' ? studentCount : f.studentCount,
-              error: errMsg
-            };
-          }
-          return f;
-        }));
+        setFiles((prev) =>
+          prev.map((f) => {
+            if (f.name === fileName) {
+              return {
+                ...f,
+                status,
+                studentCount:
+                  status === "success" ? studentCount : f.studentCount,
+                error: errMsg,
+              };
+            }
+            return f;
+          }),
+        );
       };
 
       const result = await processFiles(
@@ -183,23 +204,24 @@ export default function Home() {
         absentWeight,
         lateWeight,
         usePVC,
-        usePVS
+        usePVS,
       );
-      
+
       setParsedData({
         summary: result.summary,
-        preview: result.preview
+        preview: result.preview,
       });
 
-      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-      const fileName = exportType === 'csv' 
-        ? `Google_Workspace_Export_${dateStr}.zip`
-        : `Student_Report_Export_${dateStr}.zip`;
+      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      const fileName =
+        exportType === "csv"
+          ? `Google_Workspace_Export_${dateStr}.zip`
+          : `Student_Report_Export_${dateStr}.zip`;
 
       saveAs(result.zipBlob, fileName);
-      setSuccessMsg('ประมวลผลและดาวน์โหลดไฟล์สำเร็จ!');
+      setSuccessMsg("ประมวลผลและดาวน์โหลดไฟล์สำเร็จ!");
     } catch (err) {
-      setError(err.message || 'เกิดข้อผิดพลาดในการประมวลผลไฟล์');
+      setError(err.message || "เกิดข้อผิดพลาดในการประมวลผลไฟล์");
     } finally {
       setIsProcessing(false);
     }
@@ -217,7 +239,9 @@ export default function Home() {
         <h1 className={styles.title}>
           <span className={styles.gradientText}>Student</span> Data Export
         </h1>
-        <p className={styles.subtitle}>ระบบแปลงไฟล์รายชื่อนักเรียนอัตโนมัติ (ทำงานบนเบราว์เซอร์ 100%)</p>
+        <p className={styles.subtitle}>
+          ระบบแปลงไฟล์รายชื่อนักเรียนอัตโนมัติ (ทำงานบนเบราว์เซอร์ 100%)
+        </p>
 
         {/* Settings Panel */}
         <div className={styles.settingsCard}>
@@ -235,27 +259,45 @@ export default function Home() {
               />
             </div>
             <div className={styles.inputGroup}>
-              <label htmlFor="batchSize" className={exportType === 'excel' ? styles.disabledLabel : ''}>
+              <label
+                htmlFor="batchSize"
+                className={exportType === "excel" ? styles.disabledLabel : ""}
+              >
                 จำนวนคนต่อไฟล์ CSV (เฉพาะ CSV)
               </label>
               <input
                 id="batchSize"
                 type="number"
                 value={batchSize}
-                onChange={(e) => setBatchSize(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) =>
+                  setBatchSize(Math.max(1, parseInt(e.target.value) || 1))
+                }
                 min="1"
-                disabled={exportType === 'excel' || isProcessing}
-                className={exportType === 'excel' ? styles.disabledInput : ''}
+                disabled={exportType === "excel" || isProcessing}
+                className={exportType === "excel" ? styles.disabledInput : ""}
               />
             </div>
             <div className={styles.inputGroup}>
-              <label htmlFor="orgUnitPVC" className={!usePVC ? styles.disabledLabel : ''} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}>
+              <label
+                htmlFor="orgUnitPVC"
+                className={!usePVC ? styles.disabledLabel : ""}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  cursor: "pointer",
+                  userSelect: "none",
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={usePVC}
                   onChange={(e) => setUsePVC(e.target.checked)}
                   disabled={isProcessing}
-                  style={{ accentColor: 'var(--primary)', transform: 'scale(1.1)' }}
+                  style={{
+                    accentColor: "var(--primary)",
+                    transform: "scale(1.1)",
+                  }}
                 />
                 Org Unit Path สำหรับ ปวช.
               </label>
@@ -264,19 +306,34 @@ export default function Home() {
                 type="text"
                 value={orgUnitPVC}
                 onChange={(e) => setOrgUnitPVC(e.target.value)}
-                placeholder={usePVC ? "เช่น /Students/ปวช/2568" : "ไม่ได้เลือกใช้งาน"}
+                placeholder={
+                  usePVC ? "เช่น /Students/ปวช/2568" : "ไม่ได้เลือกใช้งาน"
+                }
                 disabled={!usePVC || isProcessing}
-                className={!usePVC ? styles.disabledInput : ''}
+                className={!usePVC ? styles.disabledInput : ""}
               />
             </div>
             <div className={styles.inputGroup}>
-              <label htmlFor="orgUnitPVS" className={!usePVS ? styles.disabledLabel : ''} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}>
+              <label
+                htmlFor="orgUnitPVS"
+                className={!usePVS ? styles.disabledLabel : ""}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  cursor: "pointer",
+                  userSelect: "none",
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={usePVS}
                   onChange={(e) => setUsePVS(e.target.checked)}
                   disabled={isProcessing}
-                  style={{ accentColor: 'var(--primary)', transform: 'scale(1.1)' }}
+                  style={{
+                    accentColor: "var(--primary)",
+                    transform: "scale(1.1)",
+                  }}
                 />
                 Org Unit Path สำหรับ ปวส.
               </label>
@@ -285,62 +342,47 @@ export default function Home() {
                 type="text"
                 value={orgUnitPVS}
                 onChange={(e) => setOrgUnitPVS(e.target.value)}
-                placeholder={usePVS ? "เช่น /Students/ปวส/2568" : "ไม่ได้เลือกใช้งาน"}
+                placeholder={
+                  usePVS ? "เช่น /Students/ปวส/2568" : "ไม่ได้เลือกใช้งาน"
+                }
                 disabled={!usePVS || isProcessing}
-                className={!usePVS ? styles.disabledInput : ''}
-              />
-            </div>
-            <div className={styles.inputGroup}>
-              <label htmlFor="absentWeight">น้ำหนักการหักคะแนน ขาด (วัน)</label>
-              <input
-                id="absentWeight"
-                type="number"
-                step="0.1"
-                min="0"
-                value={absentWeight}
-                onChange={(e) => setAbsentWeight(Math.max(0, parseFloat(e.target.value) || 0))}
-                placeholder="เช่น 1.0"
-                disabled={isProcessing}
-              />
-            </div>
-            <div className={styles.inputGroup}>
-              <label htmlFor="lateWeight">น้ำหนักการหักคะแนน สาย (วัน)</label>
-              <input
-                id="lateWeight"
-                type="number"
-                step="0.1"
-                min="0"
-                value={lateWeight}
-                onChange={(e) => setLateWeight(Math.max(0, parseFloat(e.target.value) || 0))}
-                placeholder="เช่น 0.5"
-                disabled={isProcessing}
+                className={!usePVS ? styles.disabledInput : ""}
               />
             </div>
           </div>
         </div>
 
         {/* Drop Zone */}
-        <div 
-          className={`${styles.dropZone} ${isDragging ? styles.dragging : ''}`}
+        <div
+          className={`${styles.dropZone} ${isDragging ? styles.dragging : ""}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => !isProcessing && fileInputRef.current?.click()}
-          style={{ cursor: isProcessing ? 'not-allowed' : 'pointer' }}
+          style={{ cursor: isProcessing ? "not-allowed" : "pointer" }}
         >
           <div className={styles.uploadIcon}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="17 8 12 3 7 8"></polyline>
               <line x1="12" y1="3" x2="12" y2="15"></line>
             </svg>
           </div>
           <p>ลากไฟล์ Excel (.xlsx) มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
-          <input 
-            type="file" 
-            multiple 
-            accept=".xlsx" 
-            className={styles.hiddenInput} 
+          <input
+            type="file"
+            multiple
+            accept=".xlsx"
+            className={styles.hiddenInput}
             ref={fileInputRef}
             onChange={handleFileSelect}
             disabled={isProcessing}
@@ -354,27 +396,64 @@ export default function Home() {
             <ul>
               {files.map((f, idx) => {
                 let badgeClass = styles.badgePending;
-                let badgeText = 'รอดำเนินการ';
-                if (f.status === 'processing') {
+                let badgeText = "รอดำเนินการ";
+                if (f.status === "processing") {
                   badgeClass = styles.badgeProcessing;
-                  badgeText = 'กำลังอ่านไฟล์...';
-                } else if (f.status === 'success') {
+                  badgeText = "กำลังอ่านไฟล์...";
+                } else if (f.status === "success") {
                   badgeClass = styles.badgeSuccess;
                   badgeText = `สำเร็จ (พบ ${f.studentCount} คน)`;
-                } else if (f.status === 'error') {
+                } else if (f.status === "error") {
                   badgeClass = styles.badgeError;
-                  badgeText = f.error || 'ข้อผิดพลาด';
+                  badgeText = f.error || "ข้อผิดพลาด";
                 }
 
                 return (
                   <li key={idx}>
                     <div className={styles.fileInfo}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '8px'}}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#60a5fa"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{ marginRight: "8px" }}
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                      </svg>
                       <span className={styles.fileName}>{f.name}</span>
-                      <span className={`${styles.statusBadge} ${badgeClass}`}>{badgeText}</span>
+                      <span className={`${styles.statusBadge} ${badgeClass}`}>
+                        {badgeText}
+                      </span>
                     </div>
-                    <button className={styles.removeBtn} onClick={(e) => { e.stopPropagation(); removeFile(idx); }} disabled={isProcessing}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    <button
+                      className={styles.removeBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFile(idx);
+                      }}
+                      disabled={isProcessing}
+                    >
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
                     </button>
                   </li>
                 );
@@ -387,42 +466,54 @@ export default function Home() {
         <div className={styles.optionsContainer}>
           <h3>รูปแบบการส่งออก:</h3>
           <div className={styles.radioGroup}>
-            <label className={`${styles.radioLabel} ${exportType === 'csv' ? styles.active : ''}`}>
-              <input 
-                type="radio" 
-                name="exportType" 
-                value="csv" 
-                checked={exportType === 'csv'} 
-                onChange={() => setExportType('csv')}
+            <label
+              className={`${styles.radioLabel} ${exportType === "csv" ? styles.active : ""}`}
+            >
+              <input
+                type="radio"
+                name="exportType"
+                value="csv"
+                checked={exportType === "csv"}
+                onChange={() => setExportType("csv")}
                 disabled={isProcessing}
               />
               <div className={styles.radioContent}>
-                <span className={styles.radioTitle}>CSV (Google Workspace)</span>
-                <span className={styles.radioDesc}>สำหรับนำเข้าอีเมลนักเรียนใหม่</span>
+                <span className={styles.radioTitle}>
+                  CSV (Google Workspace)
+                </span>
+                <span className={styles.radioDesc}>
+                  สำหรับนำเข้าอีเมลนักเรียนใหม่
+                </span>
               </div>
             </label>
-            <label className={`${styles.radioLabel} ${exportType === 'excel' ? styles.active : ''}`}>
-              <input 
-                type="radio" 
-                name="exportType" 
-                value="excel" 
-                checked={exportType === 'excel'} 
-                onChange={() => setExportType('excel')}
+            <label
+              className={`${styles.radioLabel} ${exportType === "excel" ? styles.active : ""}`}
+            >
+              <input
+                type="radio"
+                name="exportType"
+                value="excel"
+                checked={exportType === "excel"}
+                onChange={() => setExportType("excel")}
                 disabled={isProcessing}
               />
               <div className={styles.radioContent}>
                 <span className={styles.radioTitle}>Excel (Report)</span>
-                <span className={styles.radioDesc}>สำหรับพิมพ์รายงานทั่วไป</span>
+                <span className={styles.radioDesc}>
+                  สำหรับพิมพ์รายงานทั่วไป
+                </span>
               </div>
             </label>
           </div>
         </div>
 
         {error && <div className={styles.errorMessage}>{error}</div>}
-        {successMsg && <div className={styles.successMessage}>{successMsg}</div>}
+        {successMsg && (
+          <div className={styles.successMessage}>{successMsg}</div>
+        )}
 
-        <button 
-          className={`${styles.processBtn} ${isProcessing ? styles.processing : ''}`} 
+        <button
+          className={`${styles.processBtn} ${isProcessing ? styles.processing : ""}`}
           onClick={handleProcess}
           disabled={isProcessing || files.length === 0}
         >
@@ -432,7 +523,7 @@ export default function Home() {
               กำลังประมวลผล...
             </>
           ) : (
-            'ประมวลผลและดาวน์โหลด (.zip)'
+            "ประมวลผลและดาวน์โหลด (.zip)"
           )}
         </button>
 
@@ -441,19 +532,25 @@ export default function Home() {
           <div className={styles.resultsSection}>
             <div className={styles.divider}></div>
             <h2 className={styles.resultsTitle}>ผลการประมวลผลข้อมูล</h2>
-            
+
             {/* Stats Cards */}
             <div className={styles.statsGrid}>
               <div className={styles.statCard}>
-                <span className={styles.statValue}>{parsedData.summary.total}</span>
+                <span className={styles.statValue}>
+                  {parsedData.summary.total}
+                </span>
                 <span className={styles.statLabel}>นักเรียนทั้งหมด (คน)</span>
               </div>
               <div className={styles.statCard}>
-                <span className={styles.statValue}>{parsedData.summary.pvcCount}</span>
+                <span className={styles.statValue}>
+                  {parsedData.summary.pvcCount}
+                </span>
                 <span className={styles.statLabel}>ระดับชั้น ปวช. (คน)</span>
               </div>
               <div className={styles.statCard}>
-                <span className={styles.statValue}>{parsedData.summary.pvsCount}</span>
+                <span className={styles.statValue}>
+                  {parsedData.summary.pvsCount}
+                </span>
                 <span className={styles.statLabel}>ระดับชั้น ปวส. (คน)</span>
               </div>
             </div>
@@ -462,7 +559,9 @@ export default function Home() {
             <div className={styles.previewsContainer}>
               {parsedData.summary.pvcCount > 0 && (
                 <div className={styles.previewGroup}>
-                  <h3 className={styles.previewGroupTitle}>ตัวอย่างตารางข้อมูล ปวช. (10 คนแรก)</h3>
+                  <h3 className={styles.previewGroupTitle}>
+                    ตัวอย่างตารางข้อมูล ปวช. (10 คนแรก)
+                  </h3>
                   <div className={styles.tableWrapper}>
                     <table className={styles.previewTable}>
                       <thead>
@@ -480,27 +579,34 @@ export default function Home() {
                       <tbody>
                         {parsedData.preview.pvc.map((student, idx) => {
                           const dynamicEmail = `${student.password}@${customDomain}`;
-                          const isLowAttendance = student.attendancePercent < 80;
+                          const isLowAttendance =
+                            student.attendancePercent < 80;
                           return (
                             <tr key={idx}>
                               <td>{idx + 1}</td>
                               <td>{student.firstName}</td>
                               <td>{student.lastName}</td>
-                              <td 
-                                key={`email-${dynamicEmail}`} 
+                              <td
+                                key={`email-${dynamicEmail}`}
                                 className={`${styles.emailCell} ${styles.highlightPulse}`}
                               >
                                 {dynamicEmail}
                               </td>
-                              <td 
-                                key={`org-${orgUnitPVC}`} 
+                              <td
+                                key={`org-${orgUnitPVC}`}
                                 className={styles.highlightPulse}
                               >
                                 <code>{orgUnitPVC}</code>
                               </td>
                               <td>{student.absentCount}</td>
                               <td>{student.lateCount}</td>
-                              <td className={isLowAttendance ? styles.lowAttendance : styles.goodAttendance}>
+                              <td
+                                className={
+                                  isLowAttendance
+                                    ? styles.lowAttendance
+                                    : styles.goodAttendance
+                                }
+                              >
                                 {student.attendancePercent}%
                               </td>
                             </tr>
@@ -511,7 +617,8 @@ export default function Home() {
                   </div>
                   {parsedData.summary.pvcCount > 10 && (
                     <p className={styles.remainingText}>
-                      ... และมีข้อมูลอีก {parsedData.summary.pvcCount - 10} คนที่ซ่อนอยู่
+                      ... และมีข้อมูลอีก {parsedData.summary.pvcCount - 10}{" "}
+                      คนที่ซ่อนอยู่
                     </p>
                   )}
                 </div>
@@ -519,7 +626,9 @@ export default function Home() {
 
               {parsedData.summary.pvsCount > 0 && (
                 <div className={styles.previewGroup}>
-                  <h3 className={styles.previewGroupTitle}>ตัวอย่างตารางข้อมูล ปวส. (10 คนแรก)</h3>
+                  <h3 className={styles.previewGroupTitle}>
+                    ตัวอย่างตารางข้อมูล ปวส. (10 คนแรก)
+                  </h3>
                   <div className={styles.tableWrapper}>
                     <table className={styles.previewTable}>
                       <thead>
@@ -537,27 +646,34 @@ export default function Home() {
                       <tbody>
                         {parsedData.preview.pvs.map((student, idx) => {
                           const dynamicEmail = `${student.password}@${customDomain}`;
-                          const isLowAttendance = student.attendancePercent < 80;
+                          const isLowAttendance =
+                            student.attendancePercent < 80;
                           return (
                             <tr key={idx}>
                               <td>{idx + 1}</td>
                               <td>{student.firstName}</td>
                               <td>{student.lastName}</td>
-                              <td 
-                                key={`email-${dynamicEmail}`} 
+                              <td
+                                key={`email-${dynamicEmail}`}
                                 className={`${styles.emailCell} ${styles.highlightPulse}`}
                               >
                                 {dynamicEmail}
                               </td>
-                              <td 
-                                key={`org-${orgUnitPVS}`} 
+                              <td
+                                key={`org-${orgUnitPVS}`}
                                 className={styles.highlightPulse}
                               >
                                 <code>{orgUnitPVS}</code>
                               </td>
                               <td>{student.absentCount}</td>
                               <td>{student.lateCount}</td>
-                              <td className={isLowAttendance ? styles.lowAttendance : styles.goodAttendance}>
+                              <td
+                                className={
+                                  isLowAttendance
+                                    ? styles.lowAttendance
+                                    : styles.goodAttendance
+                                }
+                              >
                                 {student.attendancePercent}%
                               </td>
                             </tr>
@@ -568,7 +684,8 @@ export default function Home() {
                   </div>
                   {parsedData.summary.pvsCount > 10 && (
                     <p className={styles.remainingText}>
-                      ... และมีข้อมูลอีก {parsedData.summary.pvsCount - 10} คนที่ซ่อนอยู่
+                      ... และมีข้อมูลอีก {parsedData.summary.pvsCount - 10}{" "}
+                      คนที่ซ่อนอยู่
                     </p>
                   )}
                 </div>
