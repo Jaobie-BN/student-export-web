@@ -12,6 +12,10 @@ export default function Home() {
   const [batchSize, setBatchSize] = useState(100);
   const [orgUnitPVC, setOrgUnitPVC] = useState('');
   const [orgUnitPVS, setOrgUnitPVS] = useState('');
+  const [usePVC, setUsePVC] = useState(true);
+  const [usePVS, setUsePVS] = useState(true);
+  const [absentWeight, setAbsentWeight] = useState(1.0);
+  const [lateWeight, setLateWeight] = useState(0.5);
   const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
   const [parsedData, setParsedData] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -26,11 +30,19 @@ export default function Home() {
     const savedBatchSize = localStorage.getItem('student_export_batchSize');
     const savedPVC = localStorage.getItem('student_export_orgUnitPVC');
     const savedPVS = localStorage.getItem('student_export_orgUnitPVS');
+    const savedUsePVC = localStorage.getItem('student_export_usePVC');
+    const savedUsePVS = localStorage.getItem('student_export_usePVS');
+    const savedAbsentWeight = localStorage.getItem('student_export_absentWeight');
+    const savedLateWeight = localStorage.getItem('student_export_lateWeight');
 
     if (savedDomain !== null) setCustomDomain(savedDomain);
     if (savedBatchSize !== null) setBatchSize(parseInt(savedBatchSize) || 100);
     if (savedPVC !== null) setOrgUnitPVC(savedPVC);
     if (savedPVS !== null) setOrgUnitPVS(savedPVS);
+    if (savedUsePVC !== null) setUsePVC(savedUsePVC === 'true');
+    if (savedUsePVS !== null) setUsePVS(savedUsePVS === 'true');
+    if (savedAbsentWeight !== null) setAbsentWeight(parseFloat(savedAbsentWeight) || 1.0);
+    if (savedLateWeight !== null) setLateWeight(parseFloat(savedLateWeight) || 0.5);
     setIsSettingsLoaded(true);
   }, []);
 
@@ -41,7 +53,11 @@ export default function Home() {
     localStorage.setItem('student_export_batchSize', String(batchSize));
     localStorage.setItem('student_export_orgUnitPVC', orgUnitPVC);
     localStorage.setItem('student_export_orgUnitPVS', orgUnitPVS);
-  }, [customDomain, batchSize, orgUnitPVC, orgUnitPVS, isSettingsLoaded]);
+    localStorage.setItem('student_export_usePVC', String(usePVC));
+    localStorage.setItem('student_export_usePVS', String(usePVS));
+    localStorage.setItem('student_export_absentWeight', String(absentWeight));
+    localStorage.setItem('student_export_lateWeight', String(lateWeight));
+  }, [customDomain, batchSize, orgUnitPVC, orgUnitPVS, usePVC, usePVS, absentWeight, lateWeight, isSettingsLoaded]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -118,12 +134,17 @@ export default function Home() {
       return;
     }
 
-    if (!orgUnitPVC.trim()) {
+    if (!usePVC && !usePVS) {
+      setError('กรุณาเลือกอย่างน้อยหนึ่งระดับชั้น (ปวช. หรือ ปวส.)');
+      return;
+    }
+
+    if (usePVC && !orgUnitPVC.trim()) {
       setError('กรุณากรอก Org Unit Path สำหรับ ปวช.');
       return;
     }
 
-    if (!orgUnitPVS.trim()) {
+    if (usePVS && !orgUnitPVS.trim()) {
       setError('กรุณากรอก Org Unit Path สำหรับ ปวส.');
       return;
     }
@@ -158,7 +179,11 @@ export default function Home() {
         batchSize,
         orgUnitPVC.trim(),
         orgUnitPVS.trim(),
-        onProgress
+        onProgress,
+        absentWeight,
+        lateWeight,
+        usePVC,
+        usePVS
       );
       
       setParsedData({
@@ -224,24 +249,70 @@ export default function Home() {
               />
             </div>
             <div className={styles.inputGroup}>
-              <label htmlFor="orgUnitPVC">Org Unit Path สำหรับ ปวช.</label>
+              <label htmlFor="orgUnitPVC" className={!usePVC ? styles.disabledLabel : ''} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}>
+                <input
+                  type="checkbox"
+                  checked={usePVC}
+                  onChange={(e) => setUsePVC(e.target.checked)}
+                  disabled={isProcessing}
+                  style={{ accentColor: 'var(--primary)', transform: 'scale(1.1)' }}
+                />
+                Org Unit Path สำหรับ ปวช.
+              </label>
               <input
                 id="orgUnitPVC"
                 type="text"
                 value={orgUnitPVC}
                 onChange={(e) => setOrgUnitPVC(e.target.value)}
-                placeholder="เช่น /Students/ปวช/2568"
-                disabled={isProcessing}
+                placeholder={usePVC ? "เช่น /Students/ปวช/2568" : "ไม่ได้เลือกใช้งาน"}
+                disabled={!usePVC || isProcessing}
+                className={!usePVC ? styles.disabledInput : ''}
               />
             </div>
             <div className={styles.inputGroup}>
-              <label htmlFor="orgUnitPVS">Org Unit Path สำหรับ ปวส.</label>
+              <label htmlFor="orgUnitPVS" className={!usePVS ? styles.disabledLabel : ''} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}>
+                <input
+                  type="checkbox"
+                  checked={usePVS}
+                  onChange={(e) => setUsePVS(e.target.checked)}
+                  disabled={isProcessing}
+                  style={{ accentColor: 'var(--primary)', transform: 'scale(1.1)' }}
+                />
+                Org Unit Path สำหรับ ปวส.
+              </label>
               <input
                 id="orgUnitPVS"
                 type="text"
                 value={orgUnitPVS}
                 onChange={(e) => setOrgUnitPVS(e.target.value)}
-                placeholder="เช่น /Students/ปวส/2568"
+                placeholder={usePVS ? "เช่น /Students/ปวส/2568" : "ไม่ได้เลือกใช้งาน"}
+                disabled={!usePVS || isProcessing}
+                className={!usePVS ? styles.disabledInput : ''}
+              />
+            </div>
+            <div className={styles.inputGroup}>
+              <label htmlFor="absentWeight">น้ำหนักการหักคะแนน ขาด (วัน)</label>
+              <input
+                id="absentWeight"
+                type="number"
+                step="0.1"
+                min="0"
+                value={absentWeight}
+                onChange={(e) => setAbsentWeight(Math.max(0, parseFloat(e.target.value) || 0))}
+                placeholder="เช่น 1.0"
+                disabled={isProcessing}
+              />
+            </div>
+            <div className={styles.inputGroup}>
+              <label htmlFor="lateWeight">น้ำหนักการหักคะแนน สาย (วัน)</label>
+              <input
+                id="lateWeight"
+                type="number"
+                step="0.1"
+                min="0"
+                value={lateWeight}
+                onChange={(e) => setLateWeight(Math.max(0, parseFloat(e.target.value) || 0))}
+                placeholder="เช่น 0.5"
                 disabled={isProcessing}
               />
             </div>
@@ -401,11 +472,15 @@ export default function Home() {
                           <th>นามสกุล</th>
                           <th>อีเมล</th>
                           <th>Org Unit Path</th>
+                          <th>ขาด (ครั้ง)</th>
+                          <th>สาย (ครั้ง)</th>
+                          <th>% เข้าเรียน</th>
                         </tr>
                       </thead>
                       <tbody>
                         {parsedData.preview.pvc.map((student, idx) => {
                           const dynamicEmail = `${student.password}@${customDomain}`;
+                          const isLowAttendance = student.attendancePercent < 80;
                           return (
                             <tr key={idx}>
                               <td>{idx + 1}</td>
@@ -422,6 +497,11 @@ export default function Home() {
                                 className={styles.highlightPulse}
                               >
                                 <code>{orgUnitPVC}</code>
+                              </td>
+                              <td>{student.absentCount}</td>
+                              <td>{student.lateCount}</td>
+                              <td className={isLowAttendance ? styles.lowAttendance : styles.goodAttendance}>
+                                {student.attendancePercent}%
                               </td>
                             </tr>
                           );
@@ -449,11 +529,15 @@ export default function Home() {
                           <th>นามสกุล</th>
                           <th>อีเมล</th>
                           <th>Org Unit Path</th>
+                          <th>ขาด (ครั้ง)</th>
+                          <th>สาย (ครั้ง)</th>
+                          <th>% เข้าเรียน</th>
                         </tr>
                       </thead>
                       <tbody>
                         {parsedData.preview.pvs.map((student, idx) => {
                           const dynamicEmail = `${student.password}@${customDomain}`;
+                          const isLowAttendance = student.attendancePercent < 80;
                           return (
                             <tr key={idx}>
                               <td>{idx + 1}</td>
@@ -470,6 +554,11 @@ export default function Home() {
                                 className={styles.highlightPulse}
                               >
                                 <code>{orgUnitPVS}</code>
+                              </td>
+                              <td>{student.absentCount}</td>
+                              <td>{student.lateCount}</td>
+                              <td className={isLowAttendance ? styles.lowAttendance : styles.goodAttendance}>
+                                {student.attendancePercent}%
                               </td>
                             </tr>
                           );

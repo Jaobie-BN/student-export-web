@@ -547,3 +547,13 @@
   font-style: italic;
 }
 
+.lowAttendance {
+  color: var(--text-error) !important;
+  font-weight: 700;
+}
+
+.goodAttendance {
+  color: var(--text-success) !important;
+  font-weight: 700;
+}
+

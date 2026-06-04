@@ -37,17 +37,21 @@ export function parseStudentName(columns) {
 }
 
 // ฟังก์ชันประมวลผลไฟล์ Excel (รับ File object, ประเภทการส่งออก, โดเมนอีเมล, ขนาด Batch, ปวช Org Unit, ปวส Org Unit, และ callback สำหรับรายงานความคืบหน้า)
-export async function processFiles(files, exportType, customDomain = 'minburi.ac.th', batchSize = 100, orgUnitPVC = '', orgUnitPVS = '', onFileProgress = null) {
-    if (!orgUnitPVC || !orgUnitPVC.trim()) {
+export async function processFiles(files, exportType, customDomain = 'minburi.ac.th', batchSize = 100, orgUnitPVC = '', orgUnitPVS = '', onFileProgress = null, absentWeight = 1.0, lateWeight = 0.5, usePVC = true, usePVS = true) {
+    if (usePVC && (!orgUnitPVC || !orgUnitPVC.trim())) {
         throw new Error('กรุณาระบุ Org Unit Path สำหรับ ปวช.');
     }
-    if (!orgUnitPVS || !orgUnitPVS.trim()) {
+    if (usePVS && (!orgUnitPVS || !orgUnitPVS.trim())) {
         throw new Error('กรุณาระบุ Org Unit Path สำหรับ ปวส.');
     }
 
     let studentsPVC = [];
     let studentsPVS = [];
     const parsedBatchSize = parseInt(batchSize, 10) || 100;
+    const parsedAbsentWeight = isNaN(parseFloat(absentWeight)) ? 1.0 : parseFloat(absentWeight);
+    const parsedLateWeight = isNaN(parseFloat(lateWeight)) ? 0.5 : parseFloat(lateWeight);
+
+    const attendanceSymbols = new Set(['ข', 'ส', 'ล', 'ป', 'ก', 'ม', '/']);
 
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -66,14 +70,44 @@ export async function processFiles(files, exportType, customDomain = 'minburi.ac
                 const sheet = workbook.Sheets[sheetName];
                 const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
                 
+                // First, find all student rows and columns
+                const studentRows = [];
+                let maxCols = 0;
                 for (let j = 8; j < rows.length; j++) {
                     const columns = rows[j];
                     if (!columns || columns.length === 0) continue;
 
                     const studentId = columns[2] ? String(columns[2]).trim() : '';
-                    
                     if (studentId === 'รหัสประจำตัว' || !studentId || isNaN(studentId)) continue;
 
+                    studentRows.push({ rowIndex: j, studentId, columns });
+                    if (columns.length > maxCols) {
+                        maxCols = columns.length;
+                    }
+                }
+
+                if (studentRows.length === 0) return;
+
+                // Identify which columns starting from index 5 contain attendance symbols
+                const attendanceColIndices = [];
+                for (let c = 5; c < maxCols; c++) {
+                    let isAttendanceCol = false;
+                    for (const sRow of studentRows) {
+                        const val = sRow.columns[c] ? String(sRow.columns[c]).trim() : '';
+                        if (attendanceSymbols.has(val)) {
+                            isAttendanceCol = true;
+                            break;
+                        }
+                    }
+                    if (isAttendanceCol) {
+                        attendanceColIndices.push(c);
+                    }
+                }
+
+                const totalDays = attendanceColIndices.length;
+
+                // Process each student row in this sheet
+                studentRows.forEach(({ studentId, columns }) => {
                     const { firstName, lastName } = parseStudentName(columns);
                     const email = `${studentId}@${customDomain}`;
 
@@ -84,18 +118,41 @@ export async function processFiles(files, exportType, customDomain = 'minburi.ac
                         level = 'ปวช';
                     }
 
-                    let yearCode = studentId.substring(0, 2);
-                    const currentBE = new Date().getFullYear() + 543;
-                    let yearBE = isNaN(yearCode) ? String(currentBE) : '25' + yearCode;
+                    if (level === 'ปวส' && !usePVS) return;
+                    if (level === 'ปวช' && !usePVC) return;
 
                     const orgUnitPath = level === 'ปวส' ? orgUnitPVS.trim() : orgUnitPVC.trim();
+
+                    // Count attendance
+                    let absentCount = 0;
+                    let lateCount = 0;
+
+                    attendanceColIndices.forEach(colIndex => {
+                        const cellVal = columns[colIndex] ? String(columns[colIndex]).trim() : '';
+                        if (cellVal === 'ข') {
+                            absentCount++;
+                        } else if (cellVal === 'ส') {
+                            lateCount++;
+                        }
+                    });
+
+                    // Calculate percentage
+                    let attendancePercent = 100.0;
+                    if (totalDays > 0) {
+                        const penalty = (absentCount * parsedAbsentWeight) + (lateCount * parsedLateWeight);
+                        const fraction = Math.max(0, 1 - (penalty / totalDays));
+                        attendancePercent = Math.round(fraction * 100 * 100) / 100;
+                    }
 
                     const studentData = {
                         firstName,
                         lastName,
                         email,
                         password: studentId,
-                        orgUnitPath
+                        orgUnitPath,
+                        absentCount,
+                        lateCount,
+                        attendancePercent
                     };
                     
                     if (level === 'ปวส') {
@@ -104,7 +161,7 @@ export async function processFiles(files, exportType, customDomain = 'minburi.ac
                         studentsPVC.push(studentData);
                     }
                     fileStudentCount++;
-                }
+                });
             });
 
             if (onFileProgress) {
@@ -150,7 +207,10 @@ export async function processFiles(files, exportType, customDomain = 'minburi.ac
                 "Last name": s.lastName,
                 "Email address": s.email,
                 "Password": s.password,
-                "Org Unit Path": s.orgUnitPath
+                "Org Unit Path": s.orgUnitPath,
+                "ขาด (ครั้ง)": s.absentCount,
+                "สาย (ครั้ง)": s.lateCount,
+                "% เข้าเรียน": s.attendancePercent
             }));
 
             const worksheet = xlsx.utils.json_to_sheet(formattedData);
