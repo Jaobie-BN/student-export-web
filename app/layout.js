@@ -20,7 +20,7 @@ export const metadata = {
   description:
     "ระบบอัพโหลดบัญชีอีเมลสถานศึกษา Google Workspace Education — ประมวลผลบนเบราว์เซอร์ ปลอดภัย 100% ไม่ส่งข้อมูลขึ้นเซิร์ฟเวอร์",
   icons: {
-    icon: "/SEAS.png",
+    icon: "./SEAS.png",
   },
 };
 
