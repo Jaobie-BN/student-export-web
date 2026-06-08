@@ -1,102 +1,178 @@
+/* ===== SEAS Design System — Extracted from Stitch ===== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
 :root {
-  --bg-gradient-start: #0f172a;
-  --bg-gradient-end: #1e293b;
-  --primary: #3b82f6;
-  --primary-hover: #2563eb;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --glass-bg: rgba(30, 41, 59, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --success: #10b981;
-  --error: #ef4444;
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* ── Primary ── */
+  --primary: #004d99;
+  --primary-container: #1565c0;
+  --primary-fixed: #d6e3ff;
+  --primary-fixed-dim: #a9c7ff;
+  --on-primary: #ffffff;
+  --on-primary-container: #dae5ff;
+  --on-primary-fixed: #001b3d;
+  --on-primary-fixed-variant: #00468c;
 
-  /* Theme-aware backgrounds */
-  --card-bg: rgba(15, 23, 42, 0.4);
-  --card-item-bg: rgba(255, 255, 255, 0.05);
-  --card-item-hover-bg: rgba(255, 255, 255, 0.1);
-  --radio-label-hover-border: rgba(255, 255, 255, 0.3);
-  --input-bg: rgba(15, 23, 42, 0.5);
-  --input-focus-bg: rgba(15, 23, 42, 0.7);
-  --disabled-input-bg: rgba(15, 23, 42, 0.2);
-  --disabled-input-border: rgba(255, 255, 255, 0.05);
-  --stat-card-bg: rgba(255, 255, 255, 0.03);
-  --stat-card-hover-bg: rgba(255, 255, 255, 0.05);
-  --table-th-bg: rgba(255, 255, 255, 0.04);
-  --table-tr-even: rgba(255, 255, 255, 0.01);
-  --table-td-border: rgba(255, 255, 255, 0.04);
-  --table-border: rgba(255, 255, 255, 0.05);
-  --table-wrapper-border: rgba(255, 255, 255, 0.05);
+  /* ── Secondary (Green) ── */
+  --secondary: #1b6d24;
+  --secondary-container: #a0f399;
+  --secondary-fixed: #a3f69c;
+  --secondary-fixed-dim: #88d982;
+  --on-secondary: #ffffff;
+  --on-secondary-container: #217128;
 
-  /* Theme-aware text colors & status colors */
-  --text-success: #6ee7b7;
-  --text-error: #fca5a5;
-  --text-pending: #cbd5e1;
-  --text-processing: #93c5fd;
-  --email-color: #60a5fa;
-  --code-color: #cbd5e1;
-  --code-bg: rgba(0, 0, 0, 0.2);
-  --alert-success-bg: rgba(16, 185, 129, 0.1);
-  --alert-error-bg: rgba(239, 68, 68, 0.1);
+  /* ── Tertiary ── */
+  --tertiary: #005183;
+  --tertiary-container: #006aa9;
+  --tertiary-fixed: #cfe5ff;
+  --tertiary-fixed-dim: #99cbff;
+  --on-tertiary: #ffffff;
+  --on-tertiary-container: #d3e6ff;
+
+  /* ── Surfaces ── */
+  --background: #f7f9fc;
+  --app-background: #F8FAFC;
+  --surface: #f7f9fc;
+  --surface-bright: #f7f9fc;
+  --surface-dim: #d8dadd;
+  --surface-container: #eceef1;
+  --surface-container-low: #f2f4f7;
+  --surface-container-high: #e6e8eb;
+  --surface-container-highest: #e0e3e6;
+  --surface-container-lowest: #ffffff;
+  --surface-variant: #e0e3e6;
+  --surface-tint: #005db7;
+  --on-surface: #191c1e;
+  --on-surface-variant: #424752;
+  --on-background: #191c1e;
+
+  /* ── Outline ── */
+  --outline: #727783;
+  --outline-variant: #c2c6d4;
+
+  /* ── Inverse ── */
+  --inverse-surface: #2d3133;
+  --inverse-on-surface: #eff1f4;
+  --inverse-primary: #a9c7ff;
+
+  /* ── Error ── */
+  --error: #ba1a1a;
+  --error-red: #D32F2F;
+  --error-bg: #FFEBEE;
+  --error-container: #ffdad6;
+  --on-error: #ffffff;
+  --on-error-container: #93000a;
+
+  /* ── Status Tints ── */
+  --success-bg: #E8F5E9;
+  --warning-bg: #FFF8E1;
+  --pending-bg: #ECEFF1;
+  --info-surface: #EFF6FF;
+
+  /* ── Typography ── */
+  --font-headline: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* ── Spacing ── */
+  --stack-sm: 0.5rem;
+  --stack-md: 1rem;
+  --stack-lg: 2rem;
+  --gutter: 1.5rem;
+  --margin-mobile: 1.25rem;
+  --container-width: 720px;
+  --container-expanded: 800px;
+
+  /* ── Elevation ── */
+  --shadow-card: 0px 4px 20px rgba(0, 0, 0, 0.05);
+
+  /* ── Radii ── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg-gradient-start: #f1f5f9;
-    --bg-gradient-end: #cbd5e1;
-    --text-main: #0f172a;
-    --text-muted: #475569;
-    --glass-bg: rgba(255, 255, 255, 0.75);
-    --glass-border: rgba(15, 23, 42, 0.08);
-
-    /* Theme-aware backgrounds */
-    --card-bg: rgba(15, 23, 42, 0.03);
-    --card-item-bg: rgba(15, 23, 42, 0.02);
-    --card-item-hover-bg: rgba(15, 23, 42, 0.04);
-    --radio-label-hover-border: rgba(15, 23, 42, 0.15);
-    --input-bg: rgba(255, 255, 255, 0.8);
-    --input-focus-bg: rgba(255, 255, 255, 0.95);
-    --disabled-input-bg: rgba(15, 23, 42, 0.01);
-    --disabled-input-border: rgba(15, 23, 42, 0.04);
-    --stat-card-bg: rgba(15, 23, 42, 0.01);
-    --stat-card-hover-bg: rgba(15, 23, 42, 0.02);
-    --table-th-bg: rgba(15, 23, 42, 0.03);
-    --table-tr-even: rgba(15, 23, 42, 0.005);
-    --table-td-border: rgba(15, 23, 42, 0.02);
-    --table-border: rgba(15, 23, 42, 0.04);
-    --table-wrapper-border: rgba(15, 23, 42, 0.06);
-
-    /* Theme-aware text colors & status colors */
-    --text-success: #047857;      /* Dark Green */
-    --text-error: #b91c1c;        /* Dark Red */
-    --text-pending: #475569;      /* Slate-600 */
-    --text-processing: #1d4ed8;   /* Dark Blue */
-    --email-color: #2563eb;       /* Primary Blue */
-    --code-color: #1e293b;        /* Dark Slate */
-    --code-bg: rgba(15, 23, 42, 0.06);
-    --alert-success-bg: rgba(16, 185, 129, 0.08);
-    --alert-error-bg: rgba(239, 68, 68, 0.08);
-  }
-}
-
-* {
+/* ── Reset ── */
+*, *::before, *::after {
   box-sizing: border-box;
-  padding: 0;
   margin: 0;
+  padding: 0;
+}
+
+/* ── Base ── */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  font-family: var(--font-sans);
-  background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
-  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--on-surface);
+  background-color: var(--app-background);
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Material Symbols ── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+/* ── Button Reset ── */
 button {
   cursor: pointer;
   font-family: inherit;
+  border: none;
+  background: none;
+}
+
+/* ── Input Reset ── */
+input[type="text"],
+input[type="number"] {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 24px;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ── Focus visible ── */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ── Animations ── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
