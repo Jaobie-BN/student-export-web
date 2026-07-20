@@ -196,9 +196,9 @@ export async function processFiles(files, exportType, customDomain = 'minburi.ac
                 const workbook = xlsx.utils.book_new();
                 xlsx.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
-                const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+                const excelBuffer = xlsx.write(workbook, { bookType: 'biff8', type: 'array' });
                 const batchNumber = Math.floor(i / parsedBatchSize) + 1;
-                zip.file(`AddMultiUser_${levelName}_Batch_${batchNumber}.xlsx`, excelBuffer);
+                zip.file(`AddMultiUser_${levelName}_Batch_${batchNumber}.xls`, excelBuffer);
             }
         };
 
