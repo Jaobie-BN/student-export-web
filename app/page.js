@@ -158,14 +158,16 @@ export default function Home() {
       return;
     }
 
-    if (usePVC && !orgUnitPVC.trim()) {
-      setError("กรุณากรอก Org Unit Path สำหรับ ปวช.");
-      return;
-    }
+    if (exportType !== "addmultiuser") {
+      if (usePVC && !orgUnitPVC.trim()) {
+        setError("กรุณากรอก Org Unit Path สำหรับ ปวช.");
+        return;
+      }
 
-    if (usePVS && !orgUnitPVS.trim()) {
-      setError("กรุณากรอก Org Unit Path สำหรับ ปวส.");
-      return;
+      if (usePVS && !orgUnitPVS.trim()) {
+        setError("กรุณากรอก Org Unit Path สำหรับ ปวส.");
+        return;
+      }
     }
 
     setIsProcessing(true);
@@ -214,6 +216,8 @@ export default function Home() {
       const fileName =
         exportType === "csv"
           ? `Google_Workspace_Export_${dateStr}.zip`
+          : exportType === "addmultiuser"
+          ? `AddMultiUser_Export_${dateStr}.zip`
           : `Student_Report_Export_${dateStr}.zip`;
 
       saveAs(result.zipBlob, fileName);
@@ -238,8 +242,10 @@ export default function Home() {
   const isFormValid = () => {
     if (!customDomain.trim()) return false;
     if (!usePVC && !usePVS) return false;
-    if (usePVC && !orgUnitPVC.trim()) return false;
-    if (usePVS && !orgUnitPVS.trim()) return false;
+    if (exportType !== "addmultiuser") {
+      if (usePVC && !orgUnitPVC.trim()) return false;
+      if (usePVS && !orgUnitPVS.trim()) return false;
+    }
     return true;
   };
 
@@ -391,6 +397,30 @@ export default function Home() {
                     check_circle
                   </span>
                 </div>
+
+                <div
+                  className={`${styles.selectionCard} ${
+                    exportType === "addmultiuser" ? styles.selectionCardActive : ""
+                  }`}
+                  onClick={() => setExportType("addmultiuser")}
+                >
+                  <div className={`${styles.cardIcon} ${styles.cardIconMultiuser}`}>
+                    <span className="material-symbols-outlined">group_add</span>
+                  </div>
+                  <h3 className={styles.cardTitle}>Excel — Multi-User</h3>
+                  <p className={styles.cardDesc}>
+                    สำหรับนำเข้าบัญชีผู้ใช้ในรูปแบบ addmultiuser (ชื่อ, นามสกุล, อีเมลล์, username, passwprd)
+                  </p>
+                  <div className={styles.cardFeature}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "16px", marginRight: "4px" }}>
+                      splitscreen
+                    </span>
+                    แบ่งกลุ่มตามจำนวนคนต่อไฟล์ได้
+                  </div>
+                  <span className={`${styles.checkIndicator} material-symbols-outlined`}>
+                    check_circle
+                  </span>
+                </div>
               </div>
 
               <div className={styles.stepNav}>
@@ -418,10 +448,14 @@ export default function Home() {
               <div style={{ marginBottom: "24px", display: "flex", justifyContent: "center" }}>
                 <span
                   className={`${styles.statusBadge} ${
-                    exportType === "csv" ? styles.badgeSuccess : styles.badgeProcessing
+                    exportType === "csv"
+                      ? styles.badgeSuccess
+                      : exportType === "addmultiuser"
+                      ? styles.badgeInfo
+                      : styles.badgeProcessing
                   }`}
                 >
-                  รูปแบบที่เลือก: {exportType === "csv" ? "CSV (Google Workspace)" : "Excel (Report)"}
+                  รูปแบบที่เลือก: {exportType === "csv" ? "CSV (Google Workspace)" : exportType === "addmultiuser" ? "Excel (Multi-User)" : "Excel (Report)"}
                 </span>
               </div>
 
@@ -459,7 +493,7 @@ export default function Home() {
 
                   <div className={styles.inputGroup}>
                     <label className={styles.inputLabel} htmlFor="batchSize">
-                      จำนวนคนต่อไฟล์ CSV (เฉพาะ CSV)
+                      จำนวนคนต่อไฟล์ (เฉพาะ CSV / Multi-User)
                     </label>
                     <div className={styles.inputWithIcon}>
                       <span className={`${styles.inputIcon} material-symbols-outlined`}>
@@ -501,15 +535,15 @@ export default function Home() {
                     </label>
                     <input
                       type="text"
-                      className={`${styles.inputField} ${!usePVC ? styles.disabledInput : ""} ${
-                        usePVC && !orgUnitPVC.trim() ? styles.inputError : ""
+                      className={`${styles.inputField} ${!usePVC || exportType === "addmultiuser" ? styles.disabledInput : ""} ${
+                        usePVC && exportType !== "addmultiuser" && !orgUnitPVC.trim() ? styles.inputError : ""
                       }`}
-                      value={orgUnitPVC}
+                      value={exportType === "addmultiuser" ? "" : orgUnitPVC}
                       onChange={(e) => setOrgUnitPVC(e.target.value)}
-                      placeholder={usePVC ? "เช่น /Students/ปวช" : "ไม่ได้เปิดใช้งาน"}
-                      disabled={!usePVC || isProcessing}
+                      placeholder={exportType === "addmultiuser" ? "ไม่ต้องใช้ Org Unit Path สำหรับ Multi-User" : usePVC ? "เช่น /Students/ปวช" : "ไม่ได้เปิดใช้งาน"}
+                      disabled={!usePVC || exportType === "addmultiuser" || isProcessing}
                     />
-                    {usePVC && !orgUnitPVC.trim() && (
+                    {usePVC && exportType !== "addmultiuser" && !orgUnitPVC.trim() && (
                       <span className={styles.validationError}>
                         <span className="material-symbols-outlined" style={{ fontSize: "14px", marginRight: "4px" }}>
                           error
@@ -534,15 +568,15 @@ export default function Home() {
                     </label>
                     <input
                       type="text"
-                      className={`${styles.inputField} ${!usePVS ? styles.disabledInput : ""} ${
-                        usePVS && !orgUnitPVS.trim() ? styles.inputError : ""
+                      className={`${styles.inputField} ${!usePVS || exportType === "addmultiuser" ? styles.disabledInput : ""} ${
+                        usePVS && exportType !== "addmultiuser" && !orgUnitPVS.trim() ? styles.inputError : ""
                       }`}
-                      value={orgUnitPVS}
+                      value={exportType === "addmultiuser" ? "" : orgUnitPVS}
                       onChange={(e) => setOrgUnitPVS(e.target.value)}
-                      placeholder={usePVS ? "เช่น /Students/ปวส" : "ไม่ได้เปิดใช้งาน"}
-                      disabled={!usePVS || isProcessing}
+                      placeholder={exportType === "addmultiuser" ? "ไม่ต้องใช้ Org Unit Path สำหรับ Multi-User" : usePVS ? "เช่น /Students/ปวส" : "ไม่ได้เปิดใช้งาน"}
+                      disabled={!usePVS || exportType === "addmultiuser" || isProcessing}
                     />
-                    {usePVS && !orgUnitPVS.trim() && (
+                    {usePVS && exportType !== "addmultiuser" && !orgUnitPVS.trim() && (
                       <span className={styles.validationError}>
                         <span className="material-symbols-outlined" style={{ fontSize: "14px", marginRight: "4px" }}>
                           error
@@ -604,19 +638,19 @@ export default function Home() {
               <div className={styles.readinessBar}>
                 <div className={styles.readinessItem}>
                   <span className="material-symbols-outlined">check_circle</span>
-                  รูปแบบ: {exportType === "csv" ? "CSV" : "Excel"}
+                  รูปแบบ: {exportType === "csv" ? "CSV" : exportType === "addmultiuser" ? "Multi-User" : "Excel"}
                 </div>
                 <div className={styles.readinessItem}>
                   <span className="material-symbols-outlined">check_circle</span>
                   โดเมน: {customDomain}
                 </div>
-                {usePVC && (
+                {exportType !== "addmultiuser" && usePVC && (
                   <div className={styles.readinessItem}>
                     <span className="material-symbols-outlined">check_circle</span>
                     ปวช: {orgUnitPVC}
                   </div>
                 )}
-                {usePVS && (
+                {exportType !== "addmultiuser" && usePVS && (
                   <div className={styles.readinessItem}>
                     <span className="material-symbols-outlined">check_circle</span>
                     ปวส: {orgUnitPVS}
@@ -811,7 +845,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Preview tables (5 Columns) */}
+              {/* Preview tables (Dynamic Columns) */}
               {parsedData?.preview?.pvc?.length > 0 && (
                 <div className={styles.tableSection} style={{ marginBottom: "24px" }}>
                   <div className={styles.tableHeader}>
@@ -822,33 +856,86 @@ export default function Home() {
                   </div>
 
                   <div className={styles.tableWrapper}>
-                    <table className={styles.previewTable}>
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>ชื่อ</th>
-                          <th>นามสกุล</th>
-                          <th>อีเมล</th>
-                          <th>Org Unit Path</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {parsedData.preview.pvc.map((student, idx) => {
-                          const dynamicEmail = `${student.password}@${customDomain}`;
-                          return (
+                    {exportType === "addmultiuser" ? (
+                      <table className={styles.previewTable}>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>ชื่อ</th>
+                            <th>นามสกุล</th>
+                            <th>อีเมลล์</th>
+                            <th>username</th>
+                            <th>passwprd</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {parsedData.preview.pvc.map((student, idx) => (
                             <tr key={idx}>
                               <td>{idx + 1}</td>
                               <td>{student.firstName}</td>
                               <td>{student.lastName}</td>
-                              <td>{dynamicEmail}</td>
+                              <td>{student.email}</td>
+                              <td>{student.citizenId || student.studentId}</td>
+                              <td>{student.citizenId || student.studentId}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : exportType === "csv" ? (
+                      <table className={styles.previewTable}>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email Address</th>
+                            <th>Password</th>
+                            <th>Org Unit Path</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {parsedData.preview.pvc.map((student, idx) => (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td>{student.firstName}</td>
+                              <td>{student.lastName}</td>
+                              <td>{student.email}</td>
+                              <td>{student.password}</td>
                               <td>
                                 <code>{orgUnitPVC}</code>
                               </td>
                             </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <table className={styles.previewTable}>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>รหัสประจำตัว</th>
+                            <th>ชื่อ</th>
+                            <th>นามสกุล</th>
+                            <th>อีเมล</th>
+                            <th>Org Unit Path</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {parsedData.preview.pvc.map((student, idx) => (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td>{student.password}</td>
+                              <td>{student.firstName}</td>
+                              <td>{student.lastName}</td>
+                              <td>{student.email}</td>
+                              <td>
+                                <code>{orgUnitPVC}</code>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
                   </div>
                   {parsedData.summary.pvcCount > 10 && (
                     <p className={styles.remainingText}>
@@ -869,33 +956,86 @@ export default function Home() {
                   </div>
 
                   <div className={styles.tableWrapper}>
-                    <table className={styles.previewTable}>
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>ชื่อ</th>
-                          <th>นามสกุล</th>
-                          <th>อีเมล</th>
-                          <th>Org Unit Path</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {parsedData.preview.pvs.map((student, idx) => {
-                          const dynamicEmail = `${student.password}@${customDomain}`;
-                          return (
+                    {exportType === "addmultiuser" ? (
+                      <table className={styles.previewTable}>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>ชื่อ</th>
+                            <th>นามสกุล</th>
+                            <th>อีเมลล์</th>
+                            <th>username</th>
+                            <th>passwprd</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {parsedData.preview.pvs.map((student, idx) => (
                             <tr key={idx}>
                               <td>{idx + 1}</td>
                               <td>{student.firstName}</td>
                               <td>{student.lastName}</td>
-                              <td>{dynamicEmail}</td>
+                              <td>{student.email}</td>
+                              <td>{student.citizenId || student.studentId}</td>
+                              <td>{student.citizenId || student.studentId}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : exportType === "csv" ? (
+                      <table className={styles.previewTable}>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email Address</th>
+                            <th>Password</th>
+                            <th>Org Unit Path</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {parsedData.preview.pvs.map((student, idx) => (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td>{student.firstName}</td>
+                              <td>{student.lastName}</td>
+                              <td>{student.email}</td>
+                              <td>{student.password}</td>
                               <td>
                                 <code>{orgUnitPVS}</code>
                               </td>
                             </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <table className={styles.previewTable}>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>รหัสประจำตัว</th>
+                            <th>ชื่อ</th>
+                            <th>นามสกุล</th>
+                            <th>อีเมล</th>
+                            <th>Org Unit Path</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {parsedData.preview.pvs.map((student, idx) => (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td>{student.password}</td>
+                              <td>{student.firstName}</td>
+                              <td>{student.lastName}</td>
+                              <td>{student.email}</td>
+                              <td>
+                                <code>{orgUnitPVS}</code>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
                   </div>
                   {parsedData.summary.pvsCount > 10 && (
                     <p className={styles.remainingText}>

@@ -219,7 +219,7 @@
 
 .cardsGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 16px;
 }
 
@@ -278,6 +278,16 @@
 .selectionCard:hover .cardIconExcel {
   background: var(--secondary);
   color: var(--on-secondary);
+}
+
+.cardIconMultiuser {
+  background: var(--tertiary-fixed, #e8def8);
+  color: var(--on-tertiary-container, #1d192b);
+}
+
+.selectionCard:hover .cardIconMultiuser {
+  background: var(--tertiary, #6750a4);
+  color: var(--on-tertiary, #ffffff);
 }
 
 .cardTitle {

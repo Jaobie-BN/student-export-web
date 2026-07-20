@@ -38,11 +38,13 @@ export function parseStudentName(columns) {
 
 // ฟังก์ชันประมวลผลไฟล์ Excel (รับ File object, ประเภทการส่งออก, โดเมนอีเมล, ขนาด Batch, ปวช Org Unit, ปวส Org Unit, และ callback สำหรับรายงานความคืบหน้า)
 export async function processFiles(files, exportType, customDomain = 'minburi.ac.th', batchSize = 100, orgUnitPVC = '', orgUnitPVS = '', onFileProgress = null, usePVC = true, usePVS = true) {
-    if (usePVC && (!orgUnitPVC || !orgUnitPVC.trim())) {
-        throw new Error('กรุณาระบุ Org Unit Path สำหรับ ปวช.');
-    }
-    if (usePVS && (!orgUnitPVS || !orgUnitPVS.trim())) {
-        throw new Error('กรุณาระบุ Org Unit Path สำหรับ ปวส.');
+    if (exportType !== 'addmultiuser') {
+        if (usePVC && (!orgUnitPVC || !orgUnitPVC.trim())) {
+            throw new Error('กรุณาระบุ Org Unit Path สำหรับ ปวช.');
+        }
+        if (usePVS && (!orgUnitPVS || !orgUnitPVS.trim())) {
+            throw new Error('กรุณาระบุ Org Unit Path สำหรับ ปวส.');
+        }
     }
 
     let studentsPVC = [];
@@ -85,6 +87,9 @@ export async function processFiles(files, exportType, customDomain = 'minburi.ac
                     const { firstName, lastName } = parseStudentName(columns);
                     const email = `${studentId}@${customDomain}`;
 
+                    let rawCitizenId = columns[1] ? String(columns[1]).trim().replace(/\.0$/, '') : '';
+                    let citizenId = rawCitizenId && rawCitizenId !== 'เลขประจำตัวประชาชน' ? rawCitizenId : studentId;
+
                     let level = 'ปวช'; 
                     if (studentId.charAt(2) === '3' || sheetName.includes('ปวส') || file.name.includes('ปวส')) {
                         level = 'ปวส';
@@ -98,6 +103,8 @@ export async function processFiles(files, exportType, customDomain = 'minburi.ac
                     const orgUnitPath = level === 'ปวส' ? orgUnitPVS.trim() : orgUnitPVC.trim();
 
                     const studentData = {
+                        studentId,
+                        citizenId,
                         firstName,
                         lastName,
                         email,
@@ -170,6 +177,33 @@ export async function processFiles(files, exportType, customDomain = 'minburi.ac
 
         if (studentsPVC.length > 0) createExcelFile(studentsPVC, 'ปวช');
         if (studentsPVS.length > 0) createExcelFile(studentsPVS, 'ปวส');
+
+    } else if (exportType === 'addmultiuser') {
+        const createMultiUserExcelFiles = (students, levelName) => {
+            if (students.length === 0) return;
+
+            for (let i = 0; i < students.length; i += parsedBatchSize) {
+                const batch = students.slice(i, i + parsedBatchSize);
+                const formattedData = batch.map(s => ({
+                    "ชื่อ": s.firstName,
+                    "นามสกุล": s.lastName,
+                    "อีเมลล์": s.email,
+                    "username": s.citizenId,
+                    "passwprd": s.citizenId
+                }));
+
+                const worksheet = xlsx.utils.json_to_sheet(formattedData);
+                const workbook = xlsx.utils.book_new();
+                xlsx.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+                const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+                const batchNumber = Math.floor(i / parsedBatchSize) + 1;
+                zip.file(`AddMultiUser_${levelName}_Batch_${batchNumber}.xlsx`, excelBuffer);
+            }
+        };
+
+        if (studentsPVC.length > 0) createMultiUserExcelFiles(studentsPVC, 'ปวช');
+        if (studentsPVS.length > 0) createMultiUserExcelFiles(studentsPVS, 'ปวส');
     }
 
     if (Object.keys(zip.files).length === 0) {
