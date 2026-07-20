@@ -440,8 +440,9 @@ export default function Home() {
               <div className={styles.stepHeader}>
                 <h1 className={styles.pageTitle}>ตั้งค่าระบบ</h1>
                 <p className={styles.pageSubtitle}>
-                  กำหนดโดเมนอีเมลนักเรียนและตำแหน่งของหน่วยจัดระเบียบ (Org Unit Path)
-                  สำหรับการแบ่งระดับชั้นเรียน
+                  {exportType === "addmultiuser"
+                    ? "กำหนดโดเมนอีเมลนักเรียนและขนาดกลุ่มการแบ่งไฟล์ข้อมูล"
+                    : "กำหนดโดเมนอีเมลนักเรียนและตำแหน่งของหน่วยจัดระเบียบ (Org Unit Path) สำหรับการแบ่งระดับชั้นเรียน"}
                 </p>
               </div>
 
