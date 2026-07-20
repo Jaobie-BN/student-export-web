@@ -281,13 +281,13 @@
 }
 
 .cardIconMultiuser {
-  background: var(--tertiary-fixed, #e8def8);
-  color: var(--on-tertiary-container, #1d192b);
+  background: #f3e8ff;
+  color: #6b21a8;
 }
 
 .selectionCard:hover .cardIconMultiuser {
-  background: var(--tertiary, #6750a4);
-  color: var(--on-tertiary, #ffffff);
+  background: #7e22ce;
+  color: #ffffff;
 }
 
 .cardTitle {
